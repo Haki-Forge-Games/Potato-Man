@@ -53,4 +53,16 @@ public class Inputs : MonoBehaviour
             return new Vector2(0f, 0f);
         }
     }
+
+    public bool CheckPickUpPressed()
+    {
+        if (playerInputs.Player.PickDrop.WasPressedThisFrame()) return true;
+        return false;
+    }
+
+    public bool CheckShootPressed()
+    {
+        if (playerInputs.Weapons.Shoot.WasPressedThisFrame()) return true;
+        return false;
+    }
 }
