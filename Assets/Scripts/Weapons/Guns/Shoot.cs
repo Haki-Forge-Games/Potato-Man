@@ -8,26 +8,26 @@ public class Shoot : MonoBehaviour
     [SerializeField] private Inputs input;
     private RaycastHit hit;
 
-    public Camera camera { get; set; }
-
 
     private void Update()
     {
         if (input != null && input.CheckShootPressed())
         {
-            SpreadPellets();
+            HandleShoot();
         }
     }
 
     private void HandleShoot()
     {
-
+        PlayMuzzleFlash();
+        ShakeScreen();
+        SpreadPellets();
     }
 
     private bool CheckIsEnemy()
     {
-        if (camera == null) return false;
-        return Physics.Raycast(camera.transform.position, camera.transform.forward, out hit, gun.shootRange) && hit.collider.gameObject.tag == "enemy";
+        if (gun == null || gun.camera == null) return false;
+        return Physics.Raycast(gun.camera.transform.position, gun.camera.transform.forward, out hit, gun.shootRange) && hit.collider.gameObject.tag == "enemy";
     }
 
     private void SpreadPellets()
@@ -54,5 +54,24 @@ public class Shoot : MonoBehaviour
                 rb.AddForce(shootDirection.normalized * 15f, ForceMode.Impulse);
             }
         }
+    }
+
+    private void PlayMuzzleFlash()
+    {
+        if (gun == null || gun.muzzleFlash != null)
+        {
+            gun.muzzleFlash.Play();
+        }
+    }
+
+    private void ShakeScreen()
+    {
+        if (gun == null || gun.camera == null) return;
+
+        ScreenShake screenShakeScript = gun.camera.GetComponent<ScreenShake>();
+
+        if (screenShakeScript == null) return;
+
+        StartCoroutine(screenShakeScript.Shake(gun.impactMagnitude, gun.impactDuration));
     }
 }
