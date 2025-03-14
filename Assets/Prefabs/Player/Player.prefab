@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 2281398617148906501}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: 0}
+  m_LocalPosition: {x: 0, y: 4, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -76,7 +76,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 4294967295
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -152,6 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e235948468aa4ed48be26daf229a0676, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player: {fileID: 3357853798445897486}
 --- !u!114 &8337423177366923963
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -217,7 +218,7 @@ GameObject:
   - component: {fileID: 5131445047435258361}
   - component: {fileID: 7535200904040112779}
   - component: {fileID: 9166535157239947798}
-  - component: {fileID: 5172776553012646294}
+  - component: {fileID: 3634329929400652769}
   m_Layer: 3
   m_Name: Capsule
   m_TagString: Untagged
@@ -234,7 +235,7 @@ Transform:
   m_GameObject: {fileID: 5592395728940487606}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 2, z: 0}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -290,7 +291,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &5172776553012646294
+--- !u!136 &3634329929400652769
 CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -322,10 +323,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8458109980410213323}
+  - component: {fileID: 6897635910089208325}
   - component: {fileID: 3357853798445897486}
   - component: {fileID: 8524441322134010571}
   - component: {fileID: 2412929279968343971}
+  - component: {fileID: -4059090911309208501}
   - component: {fileID: 4443647779024243328}
+  - component: {fileID: 4634141780196481022}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -342,7 +346,7 @@ Transform:
   m_GameObject: {fileID: 9019524387139018554}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -350,6 +354,27 @@ Transform:
   - {fileID: 8816123413472088628}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6897635910089208325
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9019524387139018554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 3559864219
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!114 &3357853798445897486
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -364,7 +389,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSpeed: 20
   pickUpDistance: 50
-  Sensitivity: 100
+  Sensitivity: 50
   holdPosition: {fileID: 7563403558125400417}
 --- !u!114 &8524441322134010571
 MonoBehaviour:
@@ -392,6 +417,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inputs: {fileID: 8524441322134010571}
   player: {fileID: 3357853798445897486}
+--- !u!114 &-4059090911309208501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9019524387139018554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f7b80f880f1d7945b3fc4b4a5bca87b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 3357853798445897486}
+  itemsDatabase: {fileID: 11400000, guid: fc809edf4d849a54aba5cf1cdd0f1ff1, type: 2}
+  pickAndDrop: {fileID: 4443647779024243328}
 --- !u!114 &4443647779024243328
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -407,3 +447,35 @@ MonoBehaviour:
   inputs: {fileID: 8524441322134010571}
   player: {fileID: 3357853798445897486}
   playerCamera: {fileID: 3621491992438814718}
+  networkPickAnsDrop: {fileID: -4059090911309208501}
+--- !u!114 &4634141780196481022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9019524387139018554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df2868252ab5c4d1da357e8f11f1b524, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  UseUnreliableDeltas: 0
+  SyncPositionX: 1
+  SyncPositionY: 1
+  SyncPositionZ: 1
+  SyncRotAngleX: 1
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 0
+  SyncScaleX: 0
+  SyncScaleY: 0
+  SyncScaleZ: 0
+  PositionThreshold: 0.001
+  RotAngleThreshold: 0.01
+  ScaleThreshold: 0.01
+  UseQuaternionSynchronization: 0
+  UseQuaternionCompression: 0
+  UseHalfFloatPrecision: 0
+  InLocalSpace: 0
+  Interpolate: 1
+  SlerpPosition: 0

@@ -4,13 +4,17 @@ using UnityEngine;
 
 public class ScreenShake : MonoBehaviour
 {
+    [SerializeField] private Player player;
     private Vector3 originalPos;
+
     private void Start()
     {
         originalPos = transform.localPosition;
     }
     public IEnumerator Shake(float magnitude, float duration)
     {
+        if (magnitude == 0f || duration == 0f) yield break;
+
         float elapsed = 0f;
         while (elapsed < duration)
         {

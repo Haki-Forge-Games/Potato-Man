@@ -1,15 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class Movement : MonoBehaviour
+public class Movement : NetworkBehaviour
 {
     [SerializeField] private Inputs inputs;
     [SerializeField] private Player player;
 
     void Update()
     {
-        if (inputs == null) return;
+        if (!IsOwner || inputs == null) return;
 
         Vector2 movement = inputs.GetMovementVectorTwo();
         Vector3 moveDir = (transform.forward * movement.y) + (transform.right * movement.x);

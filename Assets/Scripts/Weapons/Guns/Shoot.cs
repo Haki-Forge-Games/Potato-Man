@@ -6,14 +6,28 @@ public class Shoot : MonoBehaviour
 {
     [SerializeField] private Gun gun;
     [SerializeField] private Inputs input;
-    private RaycastHit hit;
+    [SerializeField] private Item item;
 
+    private RaycastHit hit;
+    private float lastShotTime = 0.0f;  // Track last shot time
+    private const string SHOOT_ANIMATION = "Shoot";
 
     private void Update()
     {
-        if (input != null && input.CheckShootPressed())
+        GameObject grandparentObj = gameObject.transform.parent?.parent?.parent?.gameObject;
+        
+        if (grandparentObj == null) return;
+        Player player = grandparentObj.GetComponent<Player>();
+        if (player == null) return;
+        if (!player.IsOwner) return;
+
+        if (input != null && item != null && gun != null && item.isPickedUp && gun.fireRate != null && input.CheckShootPressed())
         {
-            HandleShoot();
+            if (Time.time >= lastShotTime + gun.fireRate) // Check if enough time has passed
+            {
+                HandleShoot();
+                lastShotTime = Time.time; // Update last shot time
+            }
         }
     }
 
@@ -21,39 +35,13 @@ public class Shoot : MonoBehaviour
     {
         PlayMuzzleFlash();
         ShakeScreen();
-        SpreadPellets();
+        HandleAnimator();
     }
 
     private bool CheckIsEnemy()
     {
-        if (gun == null || gun.camera == null) return false;
-        return Physics.Raycast(gun.camera.transform.position, gun.camera.transform.forward, out hit, gun.shootRange) && hit.collider.gameObject.tag == "enemy";
-    }
-
-    private void SpreadPellets()
-    {
-        if (gun == null || gun.pelletPrefab == null || gun.spreadAngle == null || gun.firePoint == null || gun.pelletCount == null) return;
-
-        for (int i = 0; i < gun.pelletCount; i++)
-        {
-            // Calculate spread (small offset in X, Y and z)
-            Vector3 spread = new Vector3(
-                Random.Range(-gun.spreadAngle, gun.spreadAngle),
-                Random.Range(-gun.spreadAngle, gun.spreadAngle),
-                Random.Range(-gun.spreadAngle, gun.spreadAngle)
-            );
-
-            // Instantiate pellet at firePoint
-            GameObject pellet = Instantiate(gun.pelletPrefab, gun.firePoint);
-
-            // Apply force in firePoint's forward direction + spread
-            Rigidbody rb = pellet.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                Vector3 shootDirection = gun.firePoint.forward + spread; // Slightly modify direction
-                rb.AddForce(shootDirection.normalized * 15f, ForceMode.Impulse);
-            }
-        }
+        if (gun == null || gun.GetComponent<Camera>() == null) return false;
+        return Physics.Raycast(gun.GetComponent<Camera>().transform.position, gun.GetComponent<Camera>().transform.forward, out hit, gun.shootRange) && hit.collider.gameObject.tag == "enemy";
     }
 
     private void PlayMuzzleFlash()
@@ -66,12 +54,18 @@ public class Shoot : MonoBehaviour
 
     private void ShakeScreen()
     {
-        if (gun == null || gun.camera == null) return;
+        GameObject grandparentObj = gameObject.transform.parent?.parent?.gameObject;
+        if (grandparentObj == null) return;
+        ScreenShake screenShake = grandparentObj.GetComponent<ScreenShake>();
+        if (screenShake == null) return;
+        StartCoroutine(screenShake.Shake(gun.impactMagnitude, gun.impactDuration));
+    }
 
-        ScreenShake screenShakeScript = gun.camera.GetComponent<ScreenShake>();
+    private void HandleAnimator()
+    {
+        if (gun == null || gun.animator == null) return;
 
-        if (screenShakeScript == null) return;
-
-        StartCoroutine(screenShakeScript.Shake(gun.impactMagnitude, gun.impactDuration));
+        gun.animator.Rebind();
+        gun.animator.Play(SHOOT_ANIMATION);
     }
 }

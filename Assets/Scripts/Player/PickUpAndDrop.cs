@@ -1,92 +1,56 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class PickUpAndDrop : MonoBehaviour
+public class PickUpAndDrop : NetworkBehaviour
 {
     [SerializeField] private Inputs inputs;
     [SerializeField] private Player player;
     [SerializeField] private Camera playerCamera;
+    [SerializeField] private NetworkPickAnsDrop networkPickAnsDrop;
 
     private RaycastHit hit;
-    private GameObject heldItem;
-    private Rigidbody heldItemRigidbody;
-    private bool isPickedUp = false;
+    public bool isPickedUp { get; set; } = false;
 
     private void Update()
     {
+        if (!IsOwner) return;
 
         if (inputs.CheckPickUpPressed())
         {
-            if (RaycastCheck() && !isPickedUp)
+            if (CanPickUpItem())
             {
-                PickUpItem();
+                TryPickUpItem();
             }
-            else
+            else if (isPickedUp)
             {
-                if (!isPickedUp) return;
-                DropItem();
+                TryDropItem();
             }
-
-
         }
     }
 
-    private bool RaycastCheck()
+    private bool CanPickUpItem()
     {
-        if (playerCamera == null) return false;
-        return Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, player.pickUpDistance) && hit.collider.gameObject.tag == "pickAbles";
+        return playerCamera != null &&
+               Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, player.pickUpDistance) &&
+               hit.collider.CompareTag("pickAbles");
     }
 
-    private void PickUpItem()
+    private void TryPickUpItem()
     {
-        if (hit.collider == null) return;
-
-        GameObject item = hit.collider.gameObject;
-        Rigidbody itemRigidbody = item.GetComponent<Rigidbody>();
-
-        if (itemRigidbody == null || player.holdPosition == null) return;
-
-        // Store the item and its Rigidbody
-        heldItem = item;
-        heldItemRigidbody = itemRigidbody;
-
-        // Disable physics so it doesn't fall
-        heldItemRigidbody.useGravity = false;
-        heldItemRigidbody.isKinematic = true;
-
-        // Attach the item to hold position
-        heldItem.transform.SetParent(player.holdPosition);
-
-        // sets holding offsets 
-        heldItem.transform.localPosition = heldItem.GetComponent<Item>().positionOffset;
-        heldItem.transform.localRotation = Quaternion.Euler(heldItem.GetComponent<Item>().rotationOffset);
-        heldItem.transform.localScale = heldItem.GetComponent<Item>().scaleOffset;
-
-
-        // heldItem.transform.Rotate(heldItem.GetComponent<Item>().rotationOffset);
-
-        isPickedUp = true;
+        NetworkObject networkObject = hit.collider.GetComponent<NetworkObject>();
+        if (networkObject != null)
+        {
+            networkPickAnsDrop.PickUpServerRpc(networkObject);
+        }
     }
 
-    private void DropItem()
+    private void TryDropItem()
     {
-        if (heldItem == null) return;
-
-        // Re-enable physics so the item falls
-        heldItemRigidbody.useGravity = true;
-        heldItemRigidbody.isKinematic = false;
-
-        // Detach the item from the player
-        heldItem.transform.SetParent(null);
-
-        // Apply a little force to make it look natural
-        heldItemRigidbody.AddForce(transform.forward * 2f, ForceMode.Impulse);
-
-        // Clear references
-        heldItem = null;
-        heldItemRigidbody = null;
-        isPickedUp = false;
+        NetworkObject networkObject = GetComponent<NetworkObject>();
+        if (networkObject != null)
+        {
+            networkPickAnsDrop.DropItemServerRpc(networkObject);
+        }
     }
 
 }

@@ -13,6 +13,18 @@ public class PlayerRotations : MonoBehaviour
 
     private void Start()
     {
+
+        if (!player.IsOwner) // If this is not the local player
+        {
+            Camera camera = GetComponent<Camera>();
+            if (camera != null)
+            {
+                camera.enabled = false;
+            }
+            return;
+        }
+
+
         if (SystemInfo.deviceType == DeviceType.Desktop)
         {
             Cursor.lockState = CursorLockMode.Locked; // Lock cursor for PC
@@ -23,6 +35,8 @@ public class PlayerRotations : MonoBehaviour
 
     void Update()
     {
+        if (!player.IsOwner) return;
+
         Vector2 lookInput = Vector2.zero;
 
         // for mobile
