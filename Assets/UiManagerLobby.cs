@@ -22,6 +22,10 @@ public class UiManagerLobby : MonoBehaviour
     public TMP_InputField joinLobbyNameInput;
     public TMP_InputField joinLobbyPasswordInput;
 
+
+    [Header("Buttons")]
+    public Button startOnlineGameButton;
+
     private Logger logger;
     public static UiManagerLobby Instance { get; private set; }
 
@@ -83,6 +87,7 @@ public class UiManagerLobby : MonoBehaviour
         if (feedbackText == null) logger.LoggerError("[UiManagerLobby] feedbackText is not assigned.");
         if (joinLobbyNameInput == null) logger.LoggerError("[UiManagerLobby] joinLobbyNameInput is not assigned.");
         if (joinLobbyPasswordInput == null) logger.LoggerError("[UiManagerLobby] joinLobbyPasswordInput is not assigned.");
+        if (startOnlineGameButton == null) logger.LoggerError("[UiManagerLobby] startOnlineGameButton is not assigned.");
     }
 
 }

@@ -119,7 +119,7 @@
     },
     "com.unity.netcode.gameobjects": {
       "version": "1.11.0",
-      "depth": 0,
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.transport": "1.4.0",
@@ -129,7 +129,7 @@
     },
     "com.unity.nuget.mono-cecil": {
       "version": "1.11.4",
-      "depth": 1,
+      "depth": 2,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
@@ -318,7 +318,7 @@
     },
     "com.unity.transport": {
       "version": "1.5.0",
-      "depth": 1,
+      "depth": 2,
       "source": "registry",
       "dependencies": {
         "com.unity.burst": "1.6.6",

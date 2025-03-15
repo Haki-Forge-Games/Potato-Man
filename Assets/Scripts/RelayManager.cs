@@ -6,9 +6,7 @@ using Unity.Services.Relay.Models;
 
 public class RelayManager : MonoBehaviour
 {
-
     public static RelayManager Instance { get; private set; }
-
 
     private void Awake()
     {
