@@ -55,23 +55,16 @@ public class SpawningManagerLobby : MonoBehaviour
             List<ulong> clientIds = new List<ulong>(NetworkManager.Singleton.ConnectedClients.Keys);
             int playerIndex = clientIds.IndexOf(clientId);
 
-            SpawnPlayerServerRpc(playerIndex);
+            SpawnPlayerServerRpc(clientId, playerIndex);
         }
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    public void SpawnPlayerServerRpc(int playerIndex = 0)
+    public void SpawnPlayerServerRpc(ulong clientId, int playerIndex = 0)
     {
         if (player == null) return;
-
-        GameObject instancedObject = Instantiate(player);
-
-        NetworkObject ntwObject = instancedObject.GetComponent<NetworkObject>();
-
-        if (ntwObject == null) return;
-
-        ntwObject.Spawn();
-        ntwObject.transform.position = playerPositions[playerIndex].transform.localPosition;
+        GameObject playerInstance = Instantiate(player);
+        playerInstance.transform.position = playerPositions[playerIndex].transform.localPosition;
+        playerInstance.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
     }
 
     private void ValidateReferences()

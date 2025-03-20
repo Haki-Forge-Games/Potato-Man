@@ -1205,50 +1205,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 241158742}
   m_CullTransparentMesh: 1
---- !u!1 &307001307
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 307001308}
-  - component: {fileID: 307001309}
-  m_Layer: 0
-  m_Name: Scene Communicator
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &307001308
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 307001307}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -2.75}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &307001309
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 307001307}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffe7278e8409f9a479b9563df16c1396, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &334125394
 GameObject:
   m_ObjectHideFlags: 0
@@ -3921,7 +3877,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1196283508
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3981,11 +3937,23 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1196283510}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1446710131}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: StartLobbyGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1196283510
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5631,7 +5599,7 @@ GameObject:
   - component: {fileID: 1499137381}
   - component: {fileID: 1499137380}
   m_Layer: 0
-  m_Name: UiManagerLobby
+  m_Name: Ui Manager Lobby
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5652,7 +5620,9 @@ MonoBehaviour:
   createRoomScreen: {fileID: 2037143523}
   joinRoomScreen: {fileID: 334125394}
   waitingScreen: {fileID: 1001042279}
+  loadingScreen: {fileID: 0}
   feedbackText: {fileID: 889196416}
+  loadingText: {fileID: 0}
   lobbyNameInput: {fileID: 1458672477}
   lobbyPasswordInput: {fileID: 1174712296}
   joinLobbyNameInput: {fileID: 1464712478}
@@ -7071,8 +7041,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 1472064628}
   - {fileID: 2001425148}
-  - {fileID: 7420999224959322286}
-  - {fileID: 2236548700981912893}
   - {fileID: 1621180882}
   - {fileID: 111834928}
   - {fileID: 553004628}
@@ -7080,8 +7048,9 @@ SceneRoots:
   - {fileID: 3824537646641252793}
   - {fileID: 5638000232304093797}
   - {fileID: 1499137381}
-  - {fileID: 307001308}
-  - {fileID: 1758340539}
-  - {fileID: 892169284}
+  - {fileID: 7420999224959322286}
+  - {fileID: 2236548700981912893}
   - {fileID: 2006873584}
   - {fileID: 1446710130}
+  - {fileID: 1758340539}
+  - {fileID: 892169284}

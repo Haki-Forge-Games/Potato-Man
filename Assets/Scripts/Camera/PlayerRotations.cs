@@ -3,25 +3,29 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine;
-
+using Unity.Netcode;
 public class PlayerRotations : MonoBehaviour
 {
     [SerializeField] private Inputs inputs;
     [SerializeField] private Player player;
 
     private float rotationX = 0f;
+    private bool IsOnlineMode => NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening;
 
     private void Start()
     {
 
-        if (!player.IsOwner) // If this is not the local player
+        if (IsOnlineMode)
         {
-            Camera camera = GetComponent<Camera>();
-            if (camera != null)
+            if (!player.IsOwner) // If this is not the local player
             {
-                camera.enabled = false;
+                Camera camera = GetComponent<Camera>();
+                if (camera != null)
+                {
+                    camera.enabled = false;
+                }
+                return;
             }
-            return;
         }
 
 
@@ -35,8 +39,20 @@ public class PlayerRotations : MonoBehaviour
 
     void Update()
     {
-        if (!player.IsOwner) return;
+        if (IsOnlineMode)
+        {
+            if (!player.IsOwner) return;
+            HandleScreenRotation();
+        }
+        else
+        {
+            HandleScreenRotation();
+        }
 
+    }
+
+    private void HandleScreenRotation()
+    {
         Vector2 lookInput = Vector2.zero;
 
         // for mobile

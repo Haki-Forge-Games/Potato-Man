@@ -14,7 +14,6 @@ public class Logger : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);
     }
 
     public void LoggerMessage(string message)

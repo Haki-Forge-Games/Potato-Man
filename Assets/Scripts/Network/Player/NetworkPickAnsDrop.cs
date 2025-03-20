@@ -4,7 +4,6 @@ using Unity.Netcode;
 public class NetworkPickAnsDrop : NetworkBehaviour
 {
     [SerializeField] private Player player;
-    [SerializeField] private ItemsDatabase itemsDatabase;
     [SerializeField] private PickUpAndDrop pickAndDrop;
 
     // <Symmary>
@@ -19,13 +18,9 @@ public class NetworkPickAnsDrop : NetworkBehaviour
         Item itemComponent = itemNtwObject.transform.GetComponent<Item>();
         if (itemComponent == null || itemComponent.afterSpawnPrefab == null) return;
 
-        // remove network obj from world
-        itemNtwObject.Despawn();
-
         // rpc for spawning a local item in player hand 
-        SpawnItemClientRpc(itemComponent.afterSpawnPrefab.name);
-
-        // changes the isPickedUp state of the item 
+        SpawnItemClientRpc(itemNtwObject);
+        itemNtwObject.Despawn();
         ChangePickUpStatusClientRpc(true, CreateClientRpcParams(serverRpcParams.Receive.SenderClientId));
     }
 
@@ -57,9 +52,11 @@ public class NetworkPickAnsDrop : NetworkBehaviour
     // </Symmary>
 
     [ClientRpc]
-    private void SpawnItemClientRpc(string itemname)
+    private void SpawnItemClientRpc(NetworkObjectReference itemRef)
     {
-        GameObject prefab = itemsDatabase.GetItemByName(itemname);
+        if (!itemRef.TryGet(out NetworkObject itemObject)) return;
+        GameObject prefab = itemObject.GetComponent<Item>()?.afterSpawnPrefab;
+
         if (prefab == null) return;
 
         GameObject instance = Instantiate(prefab, player.holdPosition);
