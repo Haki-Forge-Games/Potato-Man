@@ -259,7 +259,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3539297188
+  GlobalObjectIdHash: 3559864219
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -284,6 +284,7 @@ MonoBehaviour:
   pickUpDistance: 50
   Sensitivity: 50
   holdPosition: {fileID: 7563403558125400417}
+  playerModel: {fileID: 5069324882931294478}
 --- !u!114 &8524441322134010571
 MonoBehaviour:
   m_ObjectHideFlags: 0
