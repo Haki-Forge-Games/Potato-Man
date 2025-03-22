@@ -1,84 +1,9 @@
 fileFormatVersion: 2
-guid: 62fdd00a34b3cbf419057db4e6d4e5e6
+guid: 65ec348ee8ab1024b934235d7f243741
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Apron
-    second: {fileID: 2100000, guid: 08bc5b328fab37440944559f53bcde86, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Arm_
-    second: {fileID: 2100000, guid: 09d98c5ba4bc41b4fb80f1cfc06c271d, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Eye Ball
-    second: {fileID: 2100000, guid: 2cdb8c82906786542815bf1a359dddc1, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Hand
-    second: {fileID: 2100000, guid: 691807e2f22a54747a8f8b86d4db251e, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Leg
-    second: {fileID: 2100000, guid: c3f3689a1ed94c64bbed0a4d44455e3f, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Lips
-    second: {fileID: 2100000, guid: 89add7aaeec5e584db6e2aee88d38423, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Material.005
-    second: {fileID: 2100000, guid: fde1ae5de669f18429432a85fbbddcaa, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Potato
-    second: {fileID: 2100000, guid: 00b6d714ef4312844bf835ca911f4774, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Rusty Metal Leg Part
-    second: {fileID: 2100000, guid: ec1ef844b7fffd941b62b57b9ec561d1, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Tongue
-    second: {fileID: 2100000, guid: 0dd09141b886c364b9d2660952721cc4, type: 2}
-  - first:
-      type: UnityEngine:Texture2D
-      assembly: UnityEngine.CoreModule
-      name: 360_F_359508227_k4GQwiPxI6tbT6bxiwiVytHRMbXkesuF
-    second: {fileID: 2800000, guid: d88702c17c9e7b046b0c2c0d0e68e738, type: 3}
-  - first:
-      type: UnityEngine:Texture2D
-      assembly: UnityEngine.CoreModule
-      name: Untitled design
-    second: {fileID: 2800000, guid: 8438a795f38d7db448983bca7b0ec293, type: 3}
-  - first:
-      type: UnityEngine:Texture2D
-      assembly: UnityEngine.CoreModule
-      name: lovepik-broken-wood-grain-background-material-image_500948532
-    second: {fileID: 2800000, guid: f6b3e3e5593c85542b53ab20ecd781aa, type: 3}
-  - first:
-      type: UnityEngine:Texture2D
-      assembly: UnityEngine.CoreModule
-      name: openart-image_rebIl4NX_1731126664135_raw
-    second: {fileID: 2800000, guid: 85bbe6133b945dd4186e73a85003b354, type: 3}
-  - first:
-      type: UnityEngine:Texture2D
-      assembly: UnityEngine.CoreModule
-      name: overhead-view-red-color-powder-white-background
-    second: {fileID: 2800000, guid: ddd6d7a2ffd27814f972f903119a1587, type: 3}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -106,36 +31,7 @@ ModelImporter:
     animationWrapMode: 0
     extraExposedTransformPaths: []
     extraUserProperties: []
-    clipAnimations:
-    - serializedVersion: 16
-      name: Idle
-      takeName: mixamo.com
-      internalID: -203655887218126122
-      firstFrame: 0
-      lastFrame: 300
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
+    clipAnimations: []
     isReadable: 0
   meshes:
     lODScreenPercentages: []
@@ -474,14 +370,12 @@ ModelImporter:
     - name: mixamorig:Spine1
       parentName: mixamorig:Spine
       position: {x: -0, y: 5.869741, z: 0.00000000831362}
-      rotation: {x: -0.000000007450581, y: -0.00000003862886, z: 0.0000000013628034,
-        w: 1}
+      rotation: {x: -0.000000007450581, y: -0.00000003862886, z: 0.0000000013628034, w: 1}
       scale: {x: 1.0000001, y: 1, z: 1}
     - name: mixamorig:Spine2
       parentName: mixamorig:Spine1
       position: {x: -0, y: 6.708279, z: 0.000000038742872}
-      rotation: {x: 0.000000018626451, y: 0.000000028834222, z: 0.000000001544116,
-        w: 1}
+      rotation: {x: 0.000000018626451, y: 0.000000028834222, z: 0.000000001544116, w: 1}
       scale: {x: 1.0000002, y: 1, z: 0.99999994}
     - name: mixamorig:Neck
       parentName: mixamorig:Spine2
@@ -640,11 +534,11 @@ ModelImporter:
     hasTranslationDoF: 0
     hasExtraRoot: 1
     skeletonHasParents: 1
-  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 5737275eccaa3e844aa6975ec40322d8, type: 3}
   autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 3
   humanoidOversampling: 1
-  avatarSetup: 1
+  avatarSetup: 2
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
   importBlendShapeDeformPercent: 1
   remapMaterialsIfMaterialImportModeIsNone: 0

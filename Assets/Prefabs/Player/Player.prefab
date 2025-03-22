@@ -216,6 +216,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8458109980410213323}
+  - component: {fileID: 6809060367384418070}
   - component: {fileID: 6897635910089208325}
   - component: {fileID: 3357853798445897486}
   - component: {fileID: 8524441322134010571}
@@ -225,7 +226,7 @@ GameObject:
   - component: {fileID: 4634141780196481022}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -247,6 +248,29 @@ Transform:
   - {fileID: 8816123413472088628}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &6809060367384418070
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9019524387139018554}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.6
+  m_Height: 4.363269
+  m_Direction: 1
+  m_Center: {x: 0, y: 2.128368, z: 0}
 --- !u!114 &6897635910089208325
 MonoBehaviour:
   m_ObjectHideFlags: 0
