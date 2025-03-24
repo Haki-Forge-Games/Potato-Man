@@ -25,7 +25,7 @@ public class PickUpAndDrop : NetworkBehaviour
             {
                 TryPickUpItem();
             }
-            else if (isPickedUp)
+            else if (CheckCanDrop())
             {
                 TryDropItem();
             }
@@ -80,6 +80,19 @@ public class PickUpAndDrop : NetworkBehaviour
     #endregion
 
     #region Drop Logic
+
+    private bool CheckCanDrop()
+    {
+        if (!isPickedUp) return false;
+
+        if (playerCamera != null && Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out RaycastHit dropHit, player.pickUpDistance))
+        {
+            if (dropHit.collider.CompareTag("Bullets")) return false;
+        }
+
+        return true;
+    }
+
     // Attempts to drop the currently held item
     private void TryDropItem()
     {

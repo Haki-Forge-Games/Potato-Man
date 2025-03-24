@@ -1,52 +1,105 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
 public class Shoot : MonoBehaviour
 {
+    public int currentBullets { get; set; } = 2;
+
     [SerializeField] private Gun gun;
     [SerializeField] private Inputs input;
     [SerializeField] private Item item;
 
+    private Player player;
+    private Camera camera;
     private RaycastHit hit;
-    private float lastShotTime = 0.0f;  // Track last shot time
+    private float lastShotTime = 0.0f;
     private const string SHOOT_ANIMATION = "Shoot";
+    private bool IsOnlineMode => NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening;
+
+    private void Start()
+    {
+        GameObject grandGrandparentObj = GetGrandGrandparentObject();
+        if (grandGrandparentObj == null) return;
+
+        player = grandGrandparentObj.GetComponent<Player>();
+
+        GameObject grandparentObj = GetGrandparentObject();
+        if (grandparentObj == null) return;
+
+        camera = grandparentObj.GetComponent<Camera>();
+    }
 
     private void Update()
     {
-        GameObject grandparentObj = gameObject.transform.parent?.parent?.parent?.gameObject;
-        
-        if (grandparentObj == null) return;
-        Player player = grandparentObj.GetComponent<Player>();
-        if (player == null) return;
-        if (!player.IsOwner) return;
+         Debug.Log("Shoot script exists on client: " + NetworkManager.Singleton.LocalClientId);
 
-        if (input != null && item != null && gun != null && item.isPickedUp && gun.fireRate != null && input.CheckShootPressed())
+        if (!IsValidPlayer()) return;
+        if (CanShoot())
         {
-            if (Time.time >= lastShotTime + gun.fireRate) // Check if enough time has passed
-            {
-                HandleShoot();
-                lastShotTime = Time.time; // Update last shot time
-            }
+            HandleShoot();
+            lastShotTime = Time.time;
         }
+    }
+
+    private bool IsValidPlayer()
+    {
+        if (player == null) return false; // check if player is not null 
+
+        if (!IsOnlineMode) return true; // Check is online or offline 
+        return player.IsOwner; // Check if the player is owner if in online mode
+    }
+
+    private bool CanShoot()
+    {
+        return input != null && item != null && gun != null && item.isPickedUp && gun.fireRate > 0 && input.CheckShootPressed() && Time.time >= lastShotTime + gun.fireRate;
     }
 
     private void HandleShoot()
     {
+        if (currentBullets <= 0)
+        {
+            Debug.Log("Gun is empty");
+            return;
+        }
+
+        currentBullets--; // reducnng bullets with per shot 
+
         PlayMuzzleFlash();
         ShakeScreen();
         HandleAnimator();
+
+        if (IsEnemy() && hit.collider != null)
+        {
+            StateManager controller = hit.collider.gameObject.GetComponent<StateManager>();
+            if (controller == null) return;
+
+            if (IsOnlineMode)
+            {
+                NetworkObject ntwObject = hit.collider.gameObject.GetComponent<NetworkObject>();
+
+                if (ntwObject == null) return;
+                player.ChangeStateServerRpc(ntwObject);
+            }
+            else
+            {
+                // set enemy to death state 
+                controller.ChangeStateToDeath();
+            }
+
+        }
     }
 
-    private bool CheckIsEnemy()
+    private bool IsEnemy()
     {
-        if (gun == null || gun.GetComponent<Camera>() == null) return false;
-        return Physics.Raycast(gun.GetComponent<Camera>().transform.position, gun.GetComponent<Camera>().transform.forward, out hit, gun.shootRange) && hit.collider.gameObject.tag == "enemy";
+        if (gun == null || camera == null) return false;
+        return Physics.Raycast(camera.transform.position, camera.transform.forward, out hit, gun.shootRange) && hit.collider.CompareTag("Enemy");
     }
 
     private void PlayMuzzleFlash()
     {
-        if (gun == null || gun.muzzleFlash != null)
+        if (gun.muzzleFlash != null)
         {
             gun.muzzleFlash.Play();
         }
@@ -54,18 +107,34 @@ public class Shoot : MonoBehaviour
 
     private void ShakeScreen()
     {
-        GameObject grandparentObj = gameObject.transform.parent?.parent?.gameObject;
+        GameObject grandparentObj = GetGrandparentObject();
         if (grandparentObj == null) return;
+
         ScreenShake screenShake = grandparentObj.GetComponent<ScreenShake>();
-        if (screenShake == null) return;
-        StartCoroutine(screenShake.Shake(gun.impactMagnitude, gun.impactDuration));
+        if (screenShake != null)
+        {
+            StartCoroutine(screenShake.Shake(Mathf.Max(gun.impactMagnitude, 0f), Mathf.Max(gun.impactDuration, 0f)));
+        }
     }
 
     private void HandleAnimator()
     {
-        if (gun == null || gun.animator == null) return;
-
-        gun.animator.Rebind();
-        gun.animator.Play(SHOOT_ANIMATION);
+        if (gun.animator != null)
+        {
+            gun.animator.Rebind();
+            gun.animator.Play(SHOOT_ANIMATION);
+        }
     }
+
+    private GameObject GetGrandGrandparentObject()
+    {
+        return transform.parent?.parent?.parent?.gameObject;
+    }
+
+    private GameObject GetGrandparentObject()
+    {
+        return transform.parent?.parent?.gameObject;
+    }
+
+    // network 
 }

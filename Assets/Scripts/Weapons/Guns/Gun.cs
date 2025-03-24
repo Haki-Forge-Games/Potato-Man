@@ -10,6 +10,8 @@ public class Gun : MonoBehaviour
     public float impactDuration = 0f;
     public float fireRate = 0.5f;
 
+    [Header("Bullets")]
+    public int maxBullets = 2;
 
     [Header("Refferences")]
     public Transform firePoint;

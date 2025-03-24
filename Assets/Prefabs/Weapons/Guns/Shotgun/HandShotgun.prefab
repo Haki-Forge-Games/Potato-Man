@@ -235,6 +235,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f62f7dc06bd890d4aab43b8fd635fe02,
         type: 3}
       insertIndex: -1
+      addedObject: {fileID: -7492412657325668570}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f62f7dc06bd890d4aab43b8fd635fe02,
+        type: 3}
+      insertIndex: -1
       addedObject: {fileID: 8476976013371011128}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f62f7dc06bd890d4aab43b8fd635fe02,
         type: 3}
@@ -286,6 +290,18 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &-7492412657325668570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6422843758089085468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 265405c67ec4ee34ba9822a38062c7d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &8476976013371011128
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -319,6 +335,7 @@ MonoBehaviour:
   impactMagnitude: 0.35
   impactDuration: 0.2
   fireRate: 0.2
+  maxBullets: 2
   firePoint: {fileID: 8992269105072791463}
   animator: {fileID: 4107263937551367335}
   muzzleFlash: {fileID: 7794554186652865605}
@@ -361,3 +378,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74449791c9ea11947afa259fcd8a8bc3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gun: {fileID: 979839556847636708}
+  shoot: {fileID: 7319026787741215023}
+  inputs: {fileID: -7492412657325668570}

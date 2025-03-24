@@ -5,12 +5,12 @@ using UnityEngine;
 public class Patrol : Base
 {
     private StateManager controller;
-    private const string IDLE_TO_WALK = "IDLE_TO_WALK";
-    private const string WALK_TO_SPRINT = "WALK_TO_SPRINT";
-
-
     private Coroutine detectPlayerCoroutine;
     private bool isIdleState = false;
+
+    // animations bools 
+    private const string WALK = "WALK";
+    private const string WALK_TO_SPRINT = "WALK_TO_SPRINT";
 
     public Patrol(StateManager stateController)
     {
@@ -33,8 +33,9 @@ public class Patrol : Base
             return;
         }
 
+        controller.agent.speed = 3.5f;
         controller.agent?.SetDestination(controller.waypoints[randomIndex].transform.position);
-        controller.animator?.SetBool(IDLE_TO_WALK, true);
+        controller.animator?.SetBool(WALK, true);
     }
 
 
@@ -45,7 +46,6 @@ public class Patrol : Base
     controller.agent.remainingDistance <= controller.agent.stoppingDistance &&
     !controller.agent.hasPath)
         {
-            isIdleState = true;
             controller.ChangeState(controller.idleState);
             return;
         }
@@ -56,11 +56,7 @@ public class Patrol : Base
 
     public override void OnExit()
     {
-        if (isIdleState)
-        {
-            controller.animator?.SetBool(IDLE_TO_WALK, false);
-            isIdleState = false;
-        }
+        controller.animator?.SetBool(WALK, false);
 
         if (detectPlayerCoroutine != null)
         {

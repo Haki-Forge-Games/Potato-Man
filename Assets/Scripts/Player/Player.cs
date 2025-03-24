@@ -27,5 +27,32 @@ public class Player : NetworkBehaviour
         }
     }
 
+    [ServerRpc]
+    public void ChangeStateServerRpc(NetworkObjectReference enemyRef)
+    {
+        if (!enemyRef.TryGet(out NetworkObject ntwObject)) return;
 
+        StateManager controller = ntwObject.gameObject.GetComponent<StateManager>();
+
+        // set enemy to death state pn server 
+        controller.ChangeStateToDeath();
+
+        // Reflecting changes on client side 
+        ChangeStateClientRpc(ntwObject.NetworkObjectId);
+    }
+
+    [ClientRpc]
+    private void ChangeStateClientRpc(ulong objectId)
+    {
+        Debug.Log("client rpc");
+
+        if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(objectId, out NetworkObject ntwObject))
+        {
+            Debug.LogError($"NetworkObject with ID {objectId} not found on client.");
+            return;
+        }
+
+        StateManager controller = ntwObject.gameObject.GetComponent<StateManager>();
+        controller.ChangeStateToDeath();
+    }
 }
