@@ -55,4 +55,11 @@ public class Player : NetworkBehaviour
         StateManager controller = ntwObject.gameObject.GetComponent<StateManager>();
         controller.ChangeStateToDeath();
     }
+
+    [ServerRpc]
+    public void RemoveBulletFromWorldServerRpc(NetworkObjectReference bulletRef)
+    {
+        if (!bulletRef.TryGet(out NetworkObject bulletObject)) return;
+        bulletObject.Despawn(true);
+    }
 }

@@ -222,7 +222,6 @@ GameObject:
   - component: {fileID: 8524441322134010571}
   - component: {fileID: 2412929279968343971}
   - component: {fileID: 4443647779024243328}
-  - component: {fileID: -4059090911309208501}
   - component: {fileID: 4634141780196481022}
   m_Layer: 0
   m_Name: Player
@@ -283,7 +282,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3559864219
+  GlobalObjectIdHash: 3539297188
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -351,21 +350,7 @@ MonoBehaviour:
   inputs: {fileID: 8524441322134010571}
   player: {fileID: 3357853798445897486}
   playerCamera: {fileID: 3621491992438814718}
-  networkPickAnsDrop: {fileID: -4059090911309208501}
---- !u!114 &-4059090911309208501
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9019524387139018554}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f7b80f880f1d7945b3fc4b4a5bca87b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 3357853798445897486}
-  pickAndDrop: {fileID: 4443647779024243328}
+  networkPrefabsList: {fileID: 11400000, guid: ad81fd3d7a41e5748bb95f186b4e278a, type: 2}
 --- !u!114 &4634141780196481022
 MonoBehaviour:
   m_ObjectHideFlags: 0

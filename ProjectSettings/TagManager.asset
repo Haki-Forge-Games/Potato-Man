@@ -7,6 +7,7 @@ TagManager:
   - pickAbles
   - Enemy
   - Bullets
+  - Gun
   layers:
   - Default
   - TransparentFX

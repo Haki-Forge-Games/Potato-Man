@@ -90,7 +90,7 @@ public class StateManager : NetworkBehaviour
     // detects player every frame with the interval of 0.1 second;
     public IEnumerator DetectPlayer(Action callback = null)
     {
-        for (int i = -45; i <= 45; i += 5) // Steps of 5 degrees
+        for (int i = -90; i <= 90; i += 5) // Steps of 5 degrees
         {
             Vector3 rotatedDirection = Quaternion.Euler(0, i, 0) * transform.forward; // rotates the ray on X, Z
             Debug.DrawRay(transform.position + Vector3.up * 2, rotatedDirection * range, Color.red);

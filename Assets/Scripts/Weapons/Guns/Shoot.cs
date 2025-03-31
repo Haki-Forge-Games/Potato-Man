@@ -33,7 +33,7 @@ public class Shoot : MonoBehaviour
 
     private void Update()
     {
-         Debug.Log("Shoot script exists on client: " + NetworkManager.Singleton.LocalClientId);
+        Debug.Log("Shoot script exists on client: " + NetworkManager.Singleton.LocalClientId);
 
         if (!IsValidPlayer()) return;
         if (CanShoot())

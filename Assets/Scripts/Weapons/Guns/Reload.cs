@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
 public class Reload : MonoBehaviour
 {
@@ -11,13 +12,16 @@ public class Reload : MonoBehaviour
     private float pickUpDistance;
     private Camera camera;
     private RaycastHit hit;
+    private Player player;
+
+    private bool IsOnlineMode => NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening;
 
     private void Start()
     {
         GameObject grandGrandparentObj = GetGrandGrandparentObject();
         if (grandGrandparentObj == null) return;
 
-        Player player = grandGrandparentObj.GetComponent<Player>();
+        player = grandGrandparentObj.GetComponent<Player>();
         pickUpDistance = player?.pickUpDistance ?? 10f;
 
         GameObject grandparentObj = GetGrandparentObject();
@@ -28,7 +32,7 @@ public class Reload : MonoBehaviour
 
     private void Update()
     {
-        if (inputs.CheckPickUpPressed() && CheckIsBullet())
+        if (inputs.CheckPickUpPressed() && IsValidPlayer() && CheckIsBullet())
         {
             if (shoot.currentBullets < gun.maxBullets)
             {
@@ -41,6 +45,14 @@ public class Reload : MonoBehaviour
         }
     }
 
+    private bool IsValidPlayer()
+    {
+        if (player == null) return false; // check if player is not null 
+
+        if (!IsOnlineMode) return true; // Check is online or offline 
+        return player.IsOwner; // Check if the player is owner if in online mode
+    }
+
     private bool CheckIsBullet()
     {
         if (camera == null) return false;
@@ -49,9 +61,20 @@ public class Reload : MonoBehaviour
 
     private void ReloadGun()
     {
-        shoot.currentBullets += 1;
-        Destroy(hit.collider.gameObject);
+        if (IsOnlineMode)
+        {
+            NetworkObject bulletNtwObject = hit.collider.gameObject.GetComponent<NetworkObject>();
+            if (bulletNtwObject == null) return;
 
+            // remove bullet from world form all clients 
+            player?.RemoveBulletFromWorldServerRpc(bulletNtwObject);
+        }
+        else
+        {
+            Destroy(hit.collider.gameObject);
+        }
+
+        shoot.currentBullets += 1;
         Debug.Log("Reload Complete");
     }
 

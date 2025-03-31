@@ -5,7 +5,7 @@ using UnityEngine;
 public class Chase : Base
 {
     private StateManager controller;
-    private GameObject target;
+    private GameObject closestPlayer = null;
 
     // animations bools 
     private const string SPRINT = "SPRINT";
@@ -18,23 +18,20 @@ public class Chase : Base
 
     public override void OnEnter()
     {
-        target = GameObject.FindGameObjectsWithTag("Player")[0];
         controller.agent.speed = 10f;
-
         controller.animator?.SetBool(SPRINT, true);
+        FindClosestPlayer();
     }
 
     public override void OnUpdate()
     {
-        if (target == null) return;
-
         if (!IsInRange())
         {
             controller.ChangeState(controller.patrolState);
             return;
         }
 
-        controller.agent?.SetDestination(target.transform.position);
+        FindClosestPlayer();
     }
 
     public override void OnExit()
@@ -46,7 +43,27 @@ public class Chase : Base
     // check if the player is still in range 
     private bool IsInRange()
     {
-        if (Vector3.Distance(target.transform.position, controller.transform.position) > controller.range) return false;
+        if (closestPlayer == null) return false;
+        if (Vector3.Distance(closestPlayer.transform.position, controller.transform.position) > controller.range) return false;
         return true;
     }
+
+    private void FindClosestPlayer()
+    {
+        float minDistance = float.MaxValue; // Initialize with the highest value
+
+        foreach (var player in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            float distance = (player.transform.position - controller.transform.position).sqrMagnitude; // Distance from the enemy
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closestPlayer = player;
+            }
+        }
+
+        if (closestPlayer == null) return;
+        controller.agent?.SetDestination(closestPlayer.transform.position);
+    }
+
 }
