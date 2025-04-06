@@ -87,8 +87,8 @@ public class PickUpAndDrop : NetworkBehaviour
         Item itemComponent = itemNtwObject.GetComponent<Item>();
         if (itemComponent == null || itemComponent.afterSpawnPrefab == null) return;
 
-        SpawnItemClientRpc(itemNtwObject.NetworkObjectId, CreateClientRpcParams(serverRpcParams.Receive.SenderClientId)); // Spawn item in the owner client
-        
+        SpawnItemClientRpc(itemNtwObject.NetworkObjectId); // Spawn item in the owner client
+
         // Despawns the world object
         itemNtwObject.Despawn();
     }
@@ -100,8 +100,12 @@ public class PickUpAndDrop : NetworkBehaviour
     /// </summary>
     private bool CanDropItem()
     {
-        return isPickedUp && (!Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out RaycastHit dropHit, player.pickUpDistance) || !dropHit.collider.CompareTag("Bullets"));
+        return isPickedUp && (
+            !Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out RaycastHit dropHit, player.pickUpDistance)
+            || (dropHit.collider != null && !dropHit.collider.CompareTag("Bullets"))
+        );
     }
+
 
     /// <summary>
     /// Attempts to drop the currently held item (handles both online and offline modes).
@@ -152,8 +156,7 @@ public class PickUpAndDrop : NetworkBehaviour
                 GameObject worldObject = Instantiate(ntwObject, droppingPosition, droppingRotation);
                 worldObject.GetComponent<NetworkObject>()?.Spawn(); // Spawns the object back to world
 
-                DestroyItemClientRpc(CreateClientRpcParams(serverRpcParams.Receive.SenderClientId)); // Destroys the held Item
-                ChangePickUpStatusClientRpc(false, CreateClientRpcParams(serverRpcParams.Receive.SenderClientId));
+                DestroyItemClientRpc(); // Destroys the held Item
                 break;
             }
         }
@@ -181,7 +184,6 @@ public class PickUpAndDrop : NetworkBehaviour
     [ClientRpc]
     private void SpawnItemClientRpc(ulong objectId, ClientRpcParams clientRpcParams)
     {
-        Debug.Log("Item spawned");
         if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(objectId, out NetworkObject itemNtwObject)) return;
         GameObject itemPrefab = itemNtwObject.GetComponent<Item>()?.afterSpawnPrefab;
 
@@ -208,7 +210,6 @@ public class PickUpAndDrop : NetworkBehaviour
     [ClientRpc]
     private void SpawnItemClientRpc(ulong objectId)
     {
-        Debug.Log("Item spawned 2");
         if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(objectId, out NetworkObject itemNtwObject)) return;
         GameObject itemPrefab = itemNtwObject.GetComponent<Item>()?.afterSpawnPrefab;
 
@@ -218,27 +219,18 @@ public class PickUpAndDrop : NetworkBehaviour
 
             if (itemObject != null)
             {
-                Item itemScript = itemObject.GetComponent<Item>();
+                heldItem = itemObject;
+                Item itemScript = heldItem.GetComponent<Item>();
+
                 if (itemScript != null)
                 {
+                    itemScript.isPickedUp = true;
                     SetupItemTransform(itemObject, itemScript);
                 }
+
+
+                isPickedUp = true;
             }
-        }
-    }
-
-    /// <summary>
-    /// Spawn item in player hands on network across all clients. (Online mode)
-    /// </summary>
-    [ClientRpc]
-    private void SetHeldItemClientRpc(ulong objectId, ClientRpcParams clientRpcParams = default)
-    {
-        if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(objectId, out NetworkObject itemNtwObject)) return;
-        GameObject item = itemNtwObject.gameObject;
-
-        if (item != null)
-        {
-            heldItem = item;
         }
     }
 
@@ -246,15 +238,6 @@ public class PickUpAndDrop : NetworkBehaviour
     /// Change pickup status locally (Offline mode)
     /// </summary>
     private void ChangePickUpStatus(bool status)
-    {
-        isPickedUp = status;
-    }
-
-    /// <summary>
-    /// Change the pickup status for the specific client who picks the item (Online mode)
-    /// </summary>
-    [ClientRpc]
-    private void ChangePickUpStatusClientRpc(bool status, ClientRpcParams clientRpcParams = default)
     {
         isPickedUp = status;
     }
@@ -274,11 +257,12 @@ public class PickUpAndDrop : NetworkBehaviour
     /// Destroy item across all clients (Online mode)
     /// </summary>
     [ClientRpc]
-    private void DestroyItemClientRpc(ClientRpcParams clientRpcParams = default)
+    private void DestroyItemClientRpc()
     {
         if (heldItem != null)
         {
             Destroy(heldItem);
+            isPickedUp = false;
         }
     }
 
