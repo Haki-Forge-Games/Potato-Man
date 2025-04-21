@@ -9,7 +9,4 @@ public class Item : MonoBehaviour
     public Vector3 scaleOffset;
 
     public bool isPickedUp { get; set; } = false;
-
-    [Header("After spawn prefab")]
-    public GameObject afterSpawnPrefab;
 }

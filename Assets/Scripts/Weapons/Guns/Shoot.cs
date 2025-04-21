@@ -5,8 +5,6 @@ using Unity.Netcode;
 
 public class Shoot : MonoBehaviour
 {
-    public int currentBullets { get; set; } = 2;
-
     [SerializeField] private Gun gun;
     [SerializeField] private Inputs input;
     [SerializeField] private Item item;
@@ -33,8 +31,6 @@ public class Shoot : MonoBehaviour
 
     private void Update()
     {
-        Debug.Log("Shoot script exists on client: " + NetworkManager.Singleton.LocalClientId);
-
         if (!IsValidPlayer()) return;
         if (CanShoot())
         {
@@ -53,18 +49,23 @@ public class Shoot : MonoBehaviour
 
     private bool CanShoot()
     {
-        return input != null && item != null && gun != null && item.isPickedUp && gun.fireRate > 0 && input.CheckShootPressed() && Time.time >= lastShotTime + gun.fireRate;
+        if (input == null || item == null || gun == null) return false;
+        if (!input.CheckShootPressed()) return false;
+        if (!item.isPickedUp) return false;
+        if (Time.time <= lastShotTime + gun.fireRate) return false;
+        return true;
     }
 
     private void HandleShoot()
     {
-        if (currentBullets <= 0)
+        if (gun == null || gun.currentBullets <= 0)
         {
             Debug.Log("Gun is empty");
             return;
         }
 
-        currentBullets--; // reducnng bullets with per shot 
+        gun.currentBullets--;
+
 
         PlayMuzzleFlash();
         ShakeScreen();
@@ -99,10 +100,8 @@ public class Shoot : MonoBehaviour
 
     private void PlayMuzzleFlash()
     {
-        if (gun.muzzleFlash != null)
-        {
-            gun.muzzleFlash.Play();
-        }
+        if (gun?.muzzleFlash == null) return;
+        gun.muzzleFlash.Play();
     }
 
     private void ShakeScreen()
@@ -119,11 +118,9 @@ public class Shoot : MonoBehaviour
 
     private void HandleAnimator()
     {
-        if (gun.animator != null)
-        {
-            gun.animator.Rebind();
-            gun.animator.Play(SHOOT_ANIMATION);
-        }
+        if (gun?.animator == null) return;
+        gun.animator.Rebind();
+        gun.animator.Play(SHOOT_ANIMATION);
     }
 
     private GameObject GetGrandGrandparentObject()
@@ -136,5 +133,4 @@ public class Shoot : MonoBehaviour
         return transform.parent?.parent?.gameObject;
     }
 
-    // network 
 }

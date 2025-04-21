@@ -6,7 +6,6 @@ using Unity.Netcode;
 public class Reload : MonoBehaviour
 {
     [SerializeField] private Gun gun;
-    [SerializeField] private Shoot shoot;
     [SerializeField] private Inputs inputs;
 
     private float pickUpDistance;
@@ -34,7 +33,8 @@ public class Reload : MonoBehaviour
     {
         if (inputs.CheckPickUpPressed() && IsValidPlayer() && CheckIsBullet())
         {
-            if (shoot.currentBullets < gun.maxBullets)
+            if (gun == null) return;
+            if (gun.currentBullets < gun.maxBullets)
             {
                 ReloadGun();
             }
@@ -47,10 +47,10 @@ public class Reload : MonoBehaviour
 
     private bool IsValidPlayer()
     {
-        if (player == null) return false; // check if player is not null 
+        if (player == null) return false;
 
-        if (!IsOnlineMode) return true; // Check is online or offline 
-        return player.IsOwner; // Check if the player is owner if in online mode
+        if (!IsOnlineMode) return true;
+        return player.IsOwner;
     }
 
     private bool CheckIsBullet()
@@ -74,8 +74,8 @@ public class Reload : MonoBehaviour
             Destroy(hit.collider.gameObject);
         }
 
-        shoot.currentBullets += 1;
-        Debug.Log("Reload Complete");
+        if (gun == null) return;
+        gun.currentBullets += 1;
     }
 
     private GameObject GetGrandparentObject()
