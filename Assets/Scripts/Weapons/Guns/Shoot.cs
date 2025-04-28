@@ -9,7 +9,7 @@ public class Shoot : MonoBehaviour
     [SerializeField] private Inputs input;
     [SerializeField] private Item item;
 
-    private int currentBullets = 2;
+    public int currentBullets { get; set; } = 2;
     private float lastShotTime = 0f;
     private RaycastHit hitInfo;
 

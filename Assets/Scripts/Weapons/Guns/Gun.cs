@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Gun : MonoBehaviour, ItemInstance
+public class Gun : MonoBehaviour
 {
     [Header("Shoot Settings")]
     public float shootRange = 20f;
@@ -14,16 +14,5 @@ public class Gun : MonoBehaviour, ItemInstance
     public int maxBullets = 2;
 
     [Header("Refferences")]
-    public Transform firePoint;
-    public Animator animator;
     public ParticleSystem muzzleFlash;
-
-    public int currentBullets { get; set; } = 2;
-
-    // setting data
-    public void LoadData(ItemInstance data)
-    {
-        if (data is Gun gunData)
-            currentBullets = gunData.currentBullets;
-    }
 }

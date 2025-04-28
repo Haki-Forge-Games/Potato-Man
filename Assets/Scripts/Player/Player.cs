@@ -57,10 +57,5 @@ public class Player : NetworkBehaviour
         controller.ChangeStateToDeath();
     }
 
-    [ServerRpc]
-    public void RemoveBulletFromWorldServerRpc(NetworkObjectReference bulletRef)
-    {
-        if (!bulletRef.TryGet(out NetworkObject bulletObject)) return;
-        bulletObject.Despawn(true);
-    }
+
 }

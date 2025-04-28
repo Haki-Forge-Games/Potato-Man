@@ -3,38 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 
-public class Reload : MonoBehaviour
+public class Reload : NetworkBehaviour
 {
+    [Header("References")]
     [SerializeField] private Gun gun;
-    [SerializeField] private Inputs inputs;
+    [SerializeField] private Shoot shoot;
+    [SerializeField] private Inputs input;
+    [SerializeField] private Item item;
 
-    private float pickUpDistance;
-    private Camera camera;
-    private RaycastHit hit;
-    private Player player;
+    private RaycastHit hitInfo;
 
     private bool IsOnlineMode => NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening;
 
-    private void Start()
-    {
-        GameObject grandGrandparentObj = GetGrandGrandparentObject();
-        if (grandGrandparentObj == null) return;
-
-        player = grandGrandparentObj.GetComponent<Player>();
-        pickUpDistance = player?.pickUpDistance ?? 10f;
-
-        GameObject grandparentObj = GetGrandparentObject();
-        if (grandparentObj == null) return;
-
-        camera = grandparentObj.GetComponent<Camera>();
-    }
-
     private void Update()
     {
-        if (inputs.CheckPickUpPressed() && IsValidPlayer() && CheckIsBullet())
+        if (!IsValidPlayer()) return;
+        if (CanReload() && IsBullet())
         {
-            if (gun == null) return;
-            if (gun.currentBullets < gun.maxBullets)
+            if (shoot.currentBullets < gun.maxBullets)
             {
                 ReloadGun();
             }
@@ -42,49 +28,53 @@ public class Reload : MonoBehaviour
             {
                 Debug.Log("Gun is full");
             }
+
         }
     }
 
     private bool IsValidPlayer()
     {
-        if (player == null) return false;
-
         if (!IsOnlineMode) return true;
-        return player.IsOwner;
+        return item?.owner?.IsOwner ?? false;
     }
 
-    private bool CheckIsBullet()
+    private bool CanReload()
     {
-        if (camera == null) return false;
-        return Physics.Raycast(camera.transform.position, camera.transform.forward, out hit, pickUpDistance) && hit.collider.CompareTag("Bullets");
+        if (gun == null || input == null || item == null || shoot == null) return false;
+        if (!input.CheckPickUpPressed()) return false;
+        return true;
+    }
+
+    private bool IsBullet()
+    {
+        if (item?.owner?.camera == null) return false;
+        Transform cameraTransform = item.owner.camera.transform;
+        return Physics.Raycast(cameraTransform.position, cameraTransform.forward, out hitInfo, item.owner.pickUpDistance) && (hitInfo.collider?.CompareTag("Bullets") ?? false);
     }
 
     private void ReloadGun()
     {
+        if (hitInfo.collider?.gameObject == null) return;
+
         if (IsOnlineMode)
         {
-            NetworkObject bulletNtwObject = hit.collider.gameObject.GetComponent<NetworkObject>();
-            if (bulletNtwObject == null) return;
+            NetworkObject bulletNtwObject = hitInfo.collider.gameObject.GetComponent<NetworkObject>();
 
-            // remove bullet from world form all clients 
-            player?.RemoveBulletFromWorldServerRpc(bulletNtwObject);
+            if (bulletNtwObject == null) return;
+            RemoveBulletFromWorldServerRpc(bulletNtwObject);
         }
         else
         {
-            Destroy(hit.collider.gameObject);
+            Destroy(hitInfo.collider.gameObject);
         }
 
-        if (gun == null) return;
-        gun.currentBullets += 1;
+        shoot.currentBullets += 1;
     }
 
-    private GameObject GetGrandparentObject()
+    [ServerRpc]
+    public void RemoveBulletFromWorldServerRpc(NetworkObjectReference bulletRef)
     {
-        return transform.parent?.parent?.gameObject;
-    }
-
-    private GameObject GetGrandGrandparentObject()
-    {
-        return transform.parent?.parent?.parent?.gameObject;
+        if (!bulletRef.TryGet(out NetworkObject bulletObject)) return;
+        bulletObject.Despawn(true);
     }
 }

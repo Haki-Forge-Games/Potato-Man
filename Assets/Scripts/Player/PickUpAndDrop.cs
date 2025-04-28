@@ -38,8 +38,8 @@ public class PickUpAndDrop : NetworkBehaviour
         {
             if (!isPickedUp)
                 PickUpItem();
-            else
-                DropItem();
+            else{}
+                // DropItem();
         }
 
         UpdateHeldItemTransform();
