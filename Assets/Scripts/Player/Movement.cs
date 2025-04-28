@@ -12,18 +12,9 @@ public class Movement : NetworkBehaviour
 
     void Update()
     {
-        if (IsOnlineMode)
-        {
-            if (!IsOwner || inputs == null) return;
-            HandleMovement();
-        }
-        else
-        {
-            if (inputs == null) return;
-            HandleMovement();
-        }
-
-
+        if (inputs == null) return;
+        if (IsOnlineMode && IsOwner) HandleMovement();
+        if (!IsOnlineMode) HandleMovement();
     }
 
     private void HandleMovement()

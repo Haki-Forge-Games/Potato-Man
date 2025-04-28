@@ -9,6 +9,7 @@ public class Player : NetworkBehaviour
     public float pickUpDistance = 50f;
     public float Sensitivity = 100f;
     public Transform holdPosition;
+    public Camera camera;
     public GameObject playerModel;
 
     private bool IsOnlineMode => NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening;

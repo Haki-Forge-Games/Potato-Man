@@ -1,101 +1,91 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 
 public class Shoot : MonoBehaviour
 {
+    [Header("References")]
     [SerializeField] private Gun gun;
     [SerializeField] private Inputs input;
     [SerializeField] private Item item;
 
-    private Player player;
-    private Camera camera;
-    private RaycastHit hit;
-    private float lastShotTime = 0.0f;
-    private const string SHOOT_ANIMATION = "Shoot";
+    private int currentBullets = 2;
+    private float lastShotTime = 0f;
+    private RaycastHit hitInfo;
+
     private bool IsOnlineMode => NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening;
-
-    private void Start()
-    {
-        GameObject grandGrandparentObj = GetGrandGrandparentObject();
-        if (grandGrandparentObj == null) return;
-
-        player = grandGrandparentObj.GetComponent<Player>();
-
-        GameObject grandparentObj = GetGrandparentObject();
-        if (grandparentObj == null) return;
-
-        camera = grandparentObj.GetComponent<Camera>();
-    }
+    private const string SHOOT_ANIMATION = "Shoot";
 
     private void Update()
     {
         if (!IsValidPlayer()) return;
         if (CanShoot())
         {
-            HandleShoot();
+            ShootGun();
             lastShotTime = Time.time;
         }
     }
 
     private bool IsValidPlayer()
     {
-        if (player == null) return false; // check if player is not null 
-
-        if (!IsOnlineMode) return true; // Check is online or offline 
-        return player.IsOwner; // Check if the player is owner if in online mode
+        if (!IsOnlineMode) return true;
+        return item?.owner?.IsOwner ?? false;
     }
 
     private bool CanShoot()
     {
-        if (input == null || item == null || gun == null) return false;
+        if (gun == null || input == null || item == null) return false;
         if (!input.CheckShootPressed()) return false;
         if (!item.isPickedUp) return false;
         if (Time.time <= lastShotTime + gun.fireRate) return false;
         return true;
     }
 
-    private void HandleShoot()
+    private void ShootGun()
     {
-        if (gun == null || gun.currentBullets <= 0)
+        if (currentBullets <= 0)
         {
             Debug.Log("Gun is empty");
             return;
         }
 
-        gun.currentBullets--;
-
+        currentBullets--;
 
         PlayMuzzleFlash();
-        ShakeScreen();
-        HandleAnimator();
+        ShakeCamera();
 
-        if (IsEnemy() && hit.collider != null)
+        if (IsEnemyHit())
         {
-            StateManager controller = hit.collider.gameObject.GetComponent<StateManager>();
-            if (controller == null) return;
-
-            if (IsOnlineMode)
-            {
-                NetworkObject ntwObject = hit.collider.gameObject.GetComponent<NetworkObject>();
-
-                if (ntwObject == null) return;
-                player.ChangeStateServerRpc(ntwObject);
-            }
-            else
-            {
-                // set enemy to death state 
-                controller.ChangeStateToDeath();
-            }
-
+            if (hitInfo.collider?.gameObject == null) return;
+            HandleEnemyHit(hitInfo.collider.gameObject);
         }
     }
 
-    private bool IsEnemy()
+    private bool IsEnemyHit()
     {
-        if (gun == null || camera == null) return false;
-        return Physics.Raycast(camera.transform.position, camera.transform.forward, out hit, gun.shootRange) && hit.collider.CompareTag("Enemy");
+        if (gun == null || item?.owner?.camera == null) return false;
+
+        var cameraTransform = item.owner.camera.transform;
+        return Physics.Raycast(cameraTransform.position, cameraTransform.forward, out hitInfo, gun.shootRange) &&
+               hitInfo.collider.CompareTag("Enemy");
+    }
+
+    private void HandleEnemyHit(GameObject enemy)
+    {
+        StateManager stateManager = enemy.GetComponent<StateManager>();
+        if (stateManager == null) return;
+
+        if (IsOnlineMode)
+        {
+            NetworkObject networkObject = enemy.GetComponent<NetworkObject>();
+            if (networkObject == null) return;
+
+            item.owner.ChangeStateServerRpc(networkObject);
+        }
+        else
+        {
+            stateManager.ChangeStateToDeath();
+        }
     }
 
     private void PlayMuzzleFlash()
@@ -104,33 +94,16 @@ public class Shoot : MonoBehaviour
         gun.muzzleFlash.Play();
     }
 
-    private void ShakeScreen()
+    private void ShakeCamera()
     {
-        GameObject grandparentObj = GetGrandparentObject();
-        if (grandparentObj == null) return;
+        if (item?.owner?.camera == null) return;
 
-        ScreenShake screenShake = grandparentObj.GetComponent<ScreenShake>();
+        ScreenShake screenShake = item.owner.camera.GetComponent<ScreenShake>();
         if (screenShake != null)
         {
-            StartCoroutine(screenShake.Shake(Mathf.Max(gun.impactMagnitude, 0f), Mathf.Max(gun.impactDuration, 0f)));
+            float impactMagnitude = Mathf.Max(gun.impactMagnitude, 0f);
+            float impactDuration = Mathf.Max(gun.impactDuration, 0f);
+            StartCoroutine(screenShake.Shake(impactMagnitude, impactDuration));
         }
     }
-
-    private void HandleAnimator()
-    {
-        if (gun?.animator == null) return;
-        gun.animator.Rebind();
-        gun.animator.Play(SHOOT_ANIMATION);
-    }
-
-    private GameObject GetGrandGrandparentObject()
-    {
-        return transform.parent?.parent?.parent?.gameObject;
-    }
-
-    private GameObject GetGrandparentObject()
-    {
-        return transform.parent?.parent?.gameObject;
-    }
-
 }
