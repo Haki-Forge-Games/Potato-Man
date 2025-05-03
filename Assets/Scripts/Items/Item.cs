@@ -10,7 +10,7 @@ public class Item : MonoBehaviour
     public Vector3 scaleOffset;
 
     // states 
-    public bool isPickedUp { get; private set; }
+    public bool isPickedUp { get; private set; } = false;
     public Player owner { get; private set; }
 
     // <Summary> 

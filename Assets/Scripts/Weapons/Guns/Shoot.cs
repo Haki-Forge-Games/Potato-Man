@@ -9,12 +9,12 @@ public class Shoot : MonoBehaviour
     [SerializeField] private Inputs input;
     [SerializeField] private Item item;
 
-    public int currentBullets { get; set; } = 2;
     private float lastShotTime = 0f;
     private RaycastHit hitInfo;
 
+    public int currentBullets { get; set; } = 2;
+
     private bool IsOnlineMode => NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening;
-    private const string SHOOT_ANIMATION = "Shoot";
 
     private void Update()
     {
