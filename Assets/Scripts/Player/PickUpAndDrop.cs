@@ -86,13 +86,15 @@ public class PickUpAndDrop : NetworkBehaviour
         }
 
         itemOriginalScale = heldItem.transform.localScale;
-
         isPickedUp = true;
     }
 
     private void DropItem()
     {
         if (heldItem == null) return;
+
+        isPickedUp = false;
+        heldItem.transform.localScale = itemOriginalScale;
 
         if (heldItemScript != null)
         {
@@ -103,6 +105,7 @@ public class PickUpAndDrop : NetworkBehaviour
         // sync changes on server if in online mode 
         if (IsOnlineMode)
         {
+            SetItemScaleServerRpc(heldItem, itemOriginalScale);
             SetItemPhysicsServerRpc(heldItem.GetComponent<NetworkObject>(), false);
             RemoveOwnershipServerRpc(heldItem.GetComponent<NetworkObject>());
             ShowHideHeldItemServerRpc(heldItem.GetComponent<NetworkObject>());
@@ -117,14 +120,11 @@ public class PickUpAndDrop : NetworkBehaviour
             }
         }
 
-        heldItem.transform.localScale = itemOriginalScale; // reseting the scale
-
         // Clear references
         heldItem = null;
         heldItemRigidbody = null;
         heldItemScript = null;
 
-        isPickedUp = false;
 
         // Reset holdPosition back to original
         if (holdPosition != null)
@@ -257,7 +257,7 @@ public class PickUpAndDrop : NetworkBehaviour
     private void HideHeldItemClientRpc(NetworkObjectReference itemRef, ClientRpcParams clientRpcParams = default)
     {
         if (!itemRef.TryGet(out NetworkObject itemNetObj)) return;
-        itemNetObj.gameObject.SetActive(false);
+        itemNetObj.gameObject.GetComponent<MeshRenderer>().enabled = false;
     }
 
 
@@ -292,7 +292,17 @@ public class PickUpAndDrop : NetworkBehaviour
     private void ShowHideHeldItemClientRpc(NetworkObjectReference itemRef, ClientRpcParams clientRpcParams = default)
     {
         if (!itemRef.TryGet(out NetworkObject itemNetObj)) return;
-        itemNetObj.gameObject.SetActive(true);
+        itemNetObj.gameObject.GetComponent<MeshRenderer>().enabled = true;
+    }
+
+
+    [ServerRpc]
+    void SetItemScaleServerRpc(NetworkObjectReference itemRef, Vector3 newScale)
+    {
+        if (itemRef.TryGet(out var item))
+        {
+            item.transform.localScale = newScale;
+        }
     }
 
 }

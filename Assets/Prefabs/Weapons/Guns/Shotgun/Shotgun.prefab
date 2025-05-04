@@ -138,32 +138,32 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: f62f7dc06bd890d4aab43b8fd635fe02,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 1
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f62f7dc06bd890d4aab43b8fd635fe02,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 1
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f62f7dc06bd890d4aab43b8fd635fe02,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 1
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f62f7dc06bd890d4aab43b8fd635fe02,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 12.14
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f62f7dc06bd890d4aab43b8fd635fe02,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f62f7dc06bd890d4aab43b8fd635fe02,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 11.9
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f62f7dc06bd890d4aab43b8fd635fe02,
         type: 3}
@@ -259,11 +259,11 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f62f7dc06bd890d4aab43b8fd635fe02,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 3245156718988486946}
+      addedObject: {fileID: -7902655174099633431}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f62f7dc06bd890d4aab43b8fd635fe02,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: -7902655174099633431}
+      addedObject: {fileID: 3245156718988486946}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f62f7dc06bd890d4aab43b8fd635fe02,
         type: 3}
       insertIndex: -1
@@ -362,8 +362,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a168af9957445f4a8bfe3f9cdbc4ad5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  positionOffset: {x: -1, y: 0.65, z: 0.3}
-  rotationOffset: {x: 0, y: 4, z: 0}
+  positionOffset: {x: 0.85, y: -0.75, z: 1.75}
+  rotationOffset: {x: 0, y: 9, z: 0}
   scaleOffset: {x: 0.5, y: 0.5, z: 0.5}
 --- !u!114 &979839556847636708
 MonoBehaviour:
@@ -410,22 +410,6 @@ MonoBehaviour:
   gun: {fileID: 979839556847636708}
   input: {fileID: 6536172336930197642}
   item: {fileID: 8476976013371011128}
---- !u!114 &3245156718988486946
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6422843758089085468}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74449791c9ea11947afa259fcd8a8bc3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gun: {fileID: 979839556847636708}
-  shoot: {fileID: 0}
-  input: {fileID: 0}
-  item: {fileID: 0}
 --- !u!114 &-7902655174099633431
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -447,6 +431,22 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
+--- !u!114 &3245156718988486946
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6422843758089085468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74449791c9ea11947afa259fcd8a8bc3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gun: {fileID: 979839556847636708}
+  shoot: {fileID: 0}
+  input: {fileID: 0}
+  item: {fileID: 0}
 --- !u!114 &1936142004465015249
 MonoBehaviour:
   m_ObjectHideFlags: 0
