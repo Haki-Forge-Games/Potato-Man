@@ -6,6 +6,10 @@ using UnityEngine;
 using Unity.Netcode;
 public class PlayerRotations : MonoBehaviour
 {
+    [Header("Player Settings")]
+    public float sensitivity = 20f;
+
+    [Header("References")]
     [SerializeField] private Inputs inputs;
     [SerializeField] private Player player;
 
@@ -67,7 +71,7 @@ public class PlayerRotations : MonoBehaviour
                 // Check if touch is on the right side of the screen
                 if (touchPos.x > Screen.width / 2)
                 {
-                    lookInput = touch.delta.ReadValue() * player.Sensitivity;
+                    lookInput = touch.delta.ReadValue();
                     break; // Stop after finding the first valid right-side touch
                 }
             }
@@ -83,8 +87,8 @@ public class PlayerRotations : MonoBehaviour
 
     private void CameraLook(Vector2 lookInput)
     {
-        float mouseX = lookInput.x * player.Sensitivity * Time.deltaTime;
-        float mouseY = lookInput.y * player.Sensitivity * Time.deltaTime;
+        float mouseX = lookInput.x * sensitivity * Time.deltaTime;
+        float mouseY = lookInput.y * sensitivity * Time.deltaTime;
 
         // Rotate Camera (Up/Down)
         rotationX -= mouseY;

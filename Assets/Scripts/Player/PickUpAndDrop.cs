@@ -1,30 +1,43 @@
 using UnityEngine;
 using Unity.Netcode;
 using System.Collections.Generic;
+using UnityEngine.Animations.Rigging;
 
 public class PickUpAndDrop : NetworkBehaviour
 {
-    [Header("Settings")]
+    [Header("Pickup Settings")]
     [SerializeField] private float itemTransformSpeed = 20f;
-    [SerializeField] private float pickupDistance = 50f;
+    [SerializeField] private float pickupDistance = 8f;
 
     [Header("References")]
     [SerializeField] private Inputs inputs;
     [SerializeField] private Player player;
-    [SerializeField] private Transform holdPosition;
     [SerializeField] private Camera camera;
+    [SerializeField] private Transform holdPosition;
+    [SerializeField] private Transform teamViewItemHolder;
+    [SerializeField] private TwoBoneIKConstraint ikConstraintLeftHand;
+    [SerializeField] private TwoBoneIKConstraint ikConstraintRightHand;
 
-    private bool IsOnlineMode => NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening;
+    [Header("Left Hand")]
+    public Transform leftTarget;
+    public Transform leftHint;
+
+    [Header("Right Hand")]
+    public Transform rightTarget;
+    public Transform rightHint;
 
     private RaycastHit hit;
     private GameObject heldItem;
-    private Rigidbody heldItemRigidbody;
     private Item heldItemScript;
-    private bool isPickedUp = false;
 
-    private Vector3 itemOriginalScale;
     private Vector3 holdPositionOriginalLocalPos;
     private Quaternion holdPositionOriginalLocalRot;
+    private Vector3 itemOriginalScale;
+
+    private GameObject teammateViewObject;
+
+    private bool isPickedUp = false;
+    private bool IsOnlineMode => NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening;
 
     private void Start()
     {
@@ -35,7 +48,7 @@ public class PickUpAndDrop : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsValidPlayer()) return;
+        if (!IsValidPlayer()) return; // Check if the player is valid to pick up items
         if (inputs?.CheckPickUpPressed() ?? false)
         {
             if (!isPickedUp)
@@ -47,98 +60,15 @@ public class PickUpAndDrop : NetworkBehaviour
         UpdateHeldItemTransform();
     }
 
-    private void PickUpItem()
-    {
-        if (!CanPickUpItem()) return;
 
-        heldItem = hit.collider.gameObject;
-        heldItemScript = heldItem.GetComponent<Item>();
-        heldItemRigidbody = heldItem.GetComponent<Rigidbody>();
-
-        // sync changes on server if in online mode 
-        if (IsOnlineMode)
-        {
-            RequestOwnershipServerRpc(heldItem.GetComponent<NetworkObject>());
-            HideHeldItemServerRpc(heldItem.GetComponent<NetworkObject>());
-            SetItemPhysicsServerRpc(heldItem.GetComponent<NetworkObject>(), true);
-        }
-        else
-        {
-            // change locally if in offline mode 
-            if (heldItemRigidbody != null)
-            {
-                heldItemRigidbody.isKinematic = true;
-                heldItemRigidbody.detectCollisions = false;
-
-            }
-        }
-
-        if (heldItemScript != null)
-        {
-            heldItemScript.SetOwner(player);
-            heldItemScript.SetPickedUpState(true);
-        }
-
-        if (holdPosition != null)
-        {
-            holdPosition.localPosition = heldItemScript.positionOffset;
-            holdPosition.localRotation = Quaternion.Euler(heldItemScript.rotationOffset);
-        }
-
-        itemOriginalScale = heldItem.transform.localScale;
-        isPickedUp = true;
-    }
-
-    private void DropItem()
-    {
-        if (heldItem == null) return;
-
-        isPickedUp = false;
-        heldItem.transform.localScale = itemOriginalScale;
-
-        if (heldItemScript != null)
-        {
-            heldItemScript.SetPickedUpState();
-            heldItemScript.SetOwner();
-        }
-
-        // sync changes on server if in online mode 
-        if (IsOnlineMode)
-        {
-            SetItemScaleServerRpc(heldItem, itemOriginalScale);
-            SetItemPhysicsServerRpc(heldItem.GetComponent<NetworkObject>(), false);
-            RemoveOwnershipServerRpc(heldItem.GetComponent<NetworkObject>());
-            ShowHideHeldItemServerRpc(heldItem.GetComponent<NetworkObject>());
-        }
-        else
-        {
-            // change locally if in offline mode 
-            if (heldItemRigidbody != null)
-            {
-                heldItemRigidbody.isKinematic = false;
-                heldItemRigidbody.detectCollisions = true;
-            }
-        }
-
-        // Clear references
-        heldItem = null;
-        heldItemRigidbody = null;
-        heldItemScript = null;
-
-
-        // Reset holdPosition back to original
-        if (holdPosition != null)
-        {
-            holdPosition.localPosition = holdPositionOriginalLocalPos;
-            holdPosition.localRotation = holdPositionOriginalLocalRot;
-        }
-    }
-
+    // <Summary>
+    // Updates the transform of the held item
+    // </Summary>
     private void UpdateHeldItemTransform()
     {
         if (!isPickedUp || heldItem == null || heldItemScript == null) return;
 
-        // Smooth position
+        // // Smooth position
         heldItem.transform.position = Vector3.Lerp(
             heldItem.transform.position,
             holdPosition.position,
@@ -160,13 +90,142 @@ public class PickUpAndDrop : NetworkBehaviour
         );
     }
 
-    private bool IsValidPlayer()
+
+    // <Summary>
+    // Pick up item if the player is valid and the item is not already picked up
+    // </Summary>
+    private void PickUpItem()
     {
-        if (!IsOnlineMode) return true;
-        return IsOwner;
+        if (!CanPickUpItem()) return;
+
+        heldItem = hit.collider.gameObject;
+        heldItemScript = heldItem.GetComponent<Item>();
+
+        // sync changes on server if in online mode 
+        if (IsOnlineMode)
+            PickUpServerRpc(heldItem.GetComponent<NetworkObject>());
+        else
+            SetUpPhysics(heldItem, true); // change locally if in offline mode
+
+
+        if (heldItemScript != null)
+        {
+            heldItemScript.SetOwner(player);
+            heldItemScript.SetPickedUpState(true);
+        }
+
+        if (holdPosition != null)
+        {
+            holdPosition.localPosition = heldItemScript.positionOffset;
+            holdPosition.localRotation = Quaternion.Euler(heldItemScript.rotationOffset);
+        }
+
+        itemOriginalScale = heldItem.transform.localScale;
+        isPickedUp = true;
     }
 
 
+    // <Summary>
+    // Drop the item if it is held
+    // </Summary>
+    private void DropItem()
+    {
+        if (heldItem == null) return;
+
+        isPickedUp = false;
+
+        if (heldItemScript != null)
+        {
+            heldItemScript.SetPickedUpState();
+            heldItemScript.SetOwner();
+        }
+
+        // sync changes on server if in online mode 
+        if (IsOnlineMode)
+            DropItemServerRpc(heldItem.GetComponent<NetworkObject>(), itemOriginalScale);
+        else
+            SetUpPhysics(heldItem, false); // change locally if in offline mode
+
+        // Clear references
+        heldItem = null;
+        heldItemScript = null;
+
+
+        // Reset holdPosition back to original
+        if (holdPosition != null)
+        {
+            holdPosition.localPosition = holdPositionOriginalLocalPos;
+            holdPosition.localRotation = holdPositionOriginalLocalRot;
+        }
+    }
+
+    // <Summary>
+    // Pick up item on server and sync changes to all clients
+    // </Summary>
+    // <param name="itemRef">The item reference</param>
+
+    [ServerRpc]
+    private void PickUpServerRpc(NetworkObjectReference itemRef, ServerRpcParams serverRpcParams = default)
+    {
+        if (!itemRef.TryGet(out NetworkObject itemNetObj)) return;
+
+        // Getting all clients except the one who picked up the item
+        var allClientIds = GetAllClientIdsExcept(serverRpcParams.Receive.SenderClientId);
+        var clientRpcParams = new ClientRpcParams  // Clinet Rpc params for sending to all clients except the owner
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = allClientIds
+            }
+        };
+
+        // Setting up Ownerships
+        itemNetObj.ChangeOwnership(serverRpcParams.Receive.SenderClientId);
+
+        // Setting up Physics
+        SetUpPhysics(itemNetObj.gameObject, true);
+        SetItemPhysicsClientRpc(itemRef, true);
+
+        HandleHeldItemVisibilityClientRpc(itemRef, false, clientRpcParams);  // Setting up Visibility
+        SpawnTeammateViewItemClientRpc(itemRef, clientRpcParams);  // Spawning a non network obj for all clients except the owner one 
+
+    }
+
+    // <Summary>
+    // Drop item on server and sync changes to all clients
+    // </Summary>
+    [ServerRpc]
+    private void DropItemServerRpc(NetworkObjectReference itemRef, Vector3 itemOriginalScale, ServerRpcParams serverRpcParams = default)
+    {
+        if (!itemRef.TryGet(out NetworkObject itemNetObj)) return;
+
+        // Getting all clients except the one who picked up the item
+        var allClientIds = GetAllClientIdsExcept(serverRpcParams.Receive.SenderClientId);
+        var clientRpcParams = new ClientRpcParams  // Clinet Rpc params for sending to all clients except the owner
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = allClientIds
+            }
+        };
+
+
+        DestroyTeammateViewItemClientRpc(clientRpcParams);  // Destroying the non network obj for all clients except the owner one
+
+        // Setting up Physics                                
+        SetUpPhysics(itemNetObj.gameObject, false);
+        SetItemPhysicsClientRpc(itemRef, false);
+
+        itemNetObj.transform.localScale = itemOriginalScale; // Resetting the scale to original
+        HandleHeldItemVisibilityClientRpc(itemRef, true, clientRpcParams);  // Setting up Visibility
+        itemNetObj.RemoveOwnership(); // Setting up Ownerships
+    }
+
+
+    // <Summary>
+    // Checks if the player can pick up the item
+    // </Summary>
+    // <returns>True if the player can pick up the item, false otherwise</returns>
     private bool CanPickUpItem()
     {
         if (camera == null) return false;
@@ -184,125 +243,166 @@ public class PickUpAndDrop : NetworkBehaviour
         return itemScript != null && !isPickedUp && !itemScript.isPickedUp;
     }
 
-    [ServerRpc]
-    private void RequestOwnershipServerRpc(NetworkObjectReference itemRef, ServerRpcParams serverRpcParams = default)
-    {
-        if (!itemRef.TryGet(out NetworkObject itemNetworkObject)) return;
-        itemNetworkObject.ChangeOwnership(serverRpcParams.Receive.SenderClientId);
-
-    }
-
-    [ServerRpc]
-    private void RemoveOwnershipServerRpc(NetworkObjectReference itemRef)
-    {
-        if (!itemRef.TryGet(out NetworkObject itemNetworkObject)) return;
-        itemNetworkObject.RemoveOwnership();
-    }
-
-    [ServerRpc]
-    private void SetItemPhysicsServerRpc(NetworkObjectReference itemRef, bool isHeld)
-    {
-        if (!itemRef.TryGet(out NetworkObject itemNetObj)) return;
-
-        Rigidbody rb = itemNetObj.GetComponent<Rigidbody>();
-        if (rb == null) return;
-
-        rb.isKinematic = isHeld;
-        rb.detectCollisions = !isHeld;
-
-        // perform changes on all clients 
-        SetItemPhysicsClientRpc(itemRef, isHeld);
-    }
-
+    // <Summary>
+    // Sets up the physics for the item specifies for all clients
+    // </Summary>
     [ClientRpc]
-    private void SetItemPhysicsClientRpc(NetworkObjectReference itemRef, bool isHeld)
+    private void SetItemPhysicsClientRpc(NetworkObjectReference itemRef, bool state)
     {
         if (!itemRef.TryGet(out NetworkObject itemNetObj)) return;
-
-        Rigidbody rb = itemNetObj.GetComponent<Rigidbody>();
-        if (rb == null) return;
-
-        rb.isKinematic = isHeld;
-        rb.detectCollisions = !isHeld;
+        SetUpPhysics(itemNetObj.gameObject, state);
     }
 
-    [ServerRpc]
-    private void HideHeldItemServerRpc(NetworkObjectReference itemRef, ServerRpcParams serverRpcParams = default)
+    // <Summary>
+    // Sets up the visibility for the item specifies for specific clients
+    // </Summary>
+    // <param name="itemRef">The item reference</param>
+    // <param name="state">The state in which the item visibility needs to be set up</param>
+    // <param name="clientRpcParams">The client rpc params to perform rpc on specific clients</param>
+    [ClientRpc]
+    private void HandleHeldItemVisibilityClientRpc(NetworkObjectReference itemRef, bool state, ClientRpcParams clientRpcParams = default)
     {
         if (!itemRef.TryGet(out NetworkObject itemNetObj)) return;
+        itemNetObj.gameObject.GetComponent<MeshRenderer>().enabled = state;
+    }
 
+
+    // <Summary>
+    // Spawns the teammate view item for all clients except the owner
+    // </Summary>
+    // <param name="itemRef">The item reference</param>
+    // <param name="clientRpcParams">The client rpc params to perform rpc on specific clients</param>
+    [ClientRpc]
+    private void SpawnTeammateViewItemClientRpc(NetworkObjectReference itemRef, ClientRpcParams clientRpcParams = default)
+    {
+        if (!itemRef.TryGet(out NetworkObject itemNetObj)) return;
+        var teammateViewItemPrefab = itemNetObj.GetComponent<Item>()?.teammateViewItemPrefab;
+
+        if (teammateViewItemPrefab != null)
+        {
+            GameObject teammateViewItem = Instantiate(teammateViewItemPrefab, teamViewItemHolder.position, teamViewItemHolder.rotation);
+
+            if (teammateViewItem == null || teamViewItemHolder == null) return;
+
+            teammateViewItem.transform.SetParent(teamViewItemHolder); // Parenting the item to the holder
+            var teammateViewItemScript = teammateViewItem.GetComponent<TeamViewItem>();
+
+            if (teammateViewItemScript != null)
+            {
+                // Setting up the item transform
+                teammateViewItem.transform.localPosition = teammateViewItemScript.positionOffset;
+                teammateViewItem.transform.localRotation = Quaternion.Euler(teammateViewItemScript.rotationOffset);
+                teammateViewItem.transform.localScale = teammateViewItemScript.scaleOffset;
+
+                // Setting up the target and hint transforms
+                SetTargetAndHintTransform(leftTarget, leftHint, teammateViewItemScript.leftTarget, teammateViewItemScript.leftHint); // left hand
+                SetTargetAndHintTransform(rightTarget, rightHint, teammateViewItemScript.rightTarget, teammateViewItemScript.rightHint); // right hand
+
+                // setting weights 
+                HandleHandWeights(ikConstraintLeftHand, 1f); // left hand 
+                HandleHandWeights(ikConstraintRightHand, 1f); // right hand 
+            }
+
+            teammateViewObject = teammateViewItem;
+        }
+
+    }
+
+    // <Summary>
+    // Destroys the teammate view item for all clients except the owner
+    // </Summary>
+    // <param name="clientRpcParams">The client rpc params to perform rpc on specific clients</param>
+    [ClientRpc]
+    private void DestroyTeammateViewItemClientRpc(ClientRpcParams clientRpcParams = default)
+    {
+        if (teammateViewObject != null)
+        {
+            // Reset weights
+            HandleHandWeights(ikConstraintLeftHand, 0f); // left hand 
+            HandleHandWeights(ikConstraintRightHand, 0f); // right hand 
+
+            Destroy(teammateViewObject);
+            teammateViewObject = null;
+        }
+
+    }
+
+    // <Summary>
+    // Checks if the player is valid to pick up items for online and offline modes
+    // </Summary>
+    private bool IsValidPlayer()
+    {
+        if (!IsOnlineMode) return true;
+        return IsOwner;
+    }
+
+    // <Summary>
+    // Sets up the physics for the item specifies
+    // </Summary>
+    // <param name="item">The Item which physics needs to be set up</param>
+    // <param name="state">The state in which the item physics needs to be set up</param>
+    private void SetUpPhysics(GameObject item, bool state = false)
+    {
+        if (item == null) return;
+
+        Rigidbody rb = item.GetComponent<Rigidbody>();
+        if (rb == null) return;
+
+        rb.isKinematic = state;
+        rb.detectCollisions = !state;
+    }
+
+    // <Summary>
+    // Gets all client IDs except the one specified
+    // </Summary>
+    // <param name="excludedClientId">The client ID to exclude</param>
+    private List<ulong> GetAllClientIdsExcept(ulong excludedClientId)
+    {
         var allClientIds = NetworkManager.Singleton.ConnectedClientsIds;
         var targetClients = new List<ulong>();
 
         foreach (var clientId in allClientIds)
         {
-            if (clientId != serverRpcParams.Receive.SenderClientId)
+            if (clientId != excludedClientId)
             {
                 targetClients.Add(clientId);
             }
         }
 
-        var clientRpcParams = new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams
-            {
-                TargetClientIds = targetClients
-            }
-        };
-
-        HideHeldItemClientRpc(itemRef, clientRpcParams);
+        return targetClients;
     }
 
-    [ClientRpc]
-    private void HideHeldItemClientRpc(NetworkObjectReference itemRef, ClientRpcParams clientRpcParams = default)
+    // <Summary>
+    // Gets all client IDs except the one specified
+    // </Summary>
+    // <param name="ikConstraint">The constrain component</param>
+    // <param name="weight">The value of the weight btw 0 and 1</param>
+    private void HandleHandWeights(TwoBoneIKConstraint ikConstraint, float weight)
     {
-        if (!itemRef.TryGet(out NetworkObject itemNetObj)) return;
-        itemNetObj.gameObject.GetComponent<MeshRenderer>().enabled = false;
-    }
+        if (ikConstraint == null) return;
 
-
-    [ServerRpc]
-    private void ShowHideHeldItemServerRpc(NetworkObjectReference itemRef, ServerRpcParams serverRpcParams = default)
-    {
-        if (!itemRef.TryGet(out NetworkObject itemNetObj)) return;
-
-        var allClientIds = NetworkManager.Singleton.ConnectedClientsIds;
-        var targetClients = new List<ulong>();
-
-        foreach (var clientId in allClientIds)
-        {
-            if (clientId != serverRpcParams.Receive.SenderClientId)
-            {
-                targetClients.Add(clientId);
-            }
-        }
-
-        var clientRpcParams = new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams
-            {
-                TargetClientIds = targetClients
-            }
-        };
-
-        ShowHideHeldItemClientRpc(itemRef, clientRpcParams);
-    }
-
-    [ClientRpc]
-    private void ShowHideHeldItemClientRpc(NetworkObjectReference itemRef, ClientRpcParams clientRpcParams = default)
-    {
-        if (!itemRef.TryGet(out NetworkObject itemNetObj)) return;
-        itemNetObj.gameObject.GetComponent<MeshRenderer>().enabled = true;
+        ikConstraint.data.targetPositionWeight = weight;
+        ikConstraint.data.targetRotationWeight = weight;
+        ikConstraint.data.hintWeight = weight;
     }
 
 
-    [ServerRpc]
-    void SetItemScaleServerRpc(NetworkObjectReference itemRef, Vector3 newScale)
+    // <Summary>
+    // Sets the target and hint transforms for the item
+    // </Summary>
+    // <param name="target">The target transform</param>
+    // <param name="hint">The hint transform</param>
+    // <param name="newTarget">The new target transform</param>
+    // <param name="newHint">The new hint transform</param>
+    private void SetTargetAndHintTransform(Transform target, Transform hint, Transform newTarget, Transform newHint)
     {
-        if (itemRef.TryGet(out var item))
-        {
-            item.transform.localScale = newScale;
-        }
+        if (target == null || hint == null || newTarget == null || newHint == null) return;
+
+        target.position = newTarget.position;
+        target.rotation = newTarget.rotation;
+
+        hint.position = newHint.position;
+        hint.rotation = newHint.rotation;
     }
 
 }

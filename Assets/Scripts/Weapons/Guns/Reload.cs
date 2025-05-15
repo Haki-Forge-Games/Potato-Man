@@ -5,72 +5,82 @@ using Unity.Netcode;
 
 public class Reload : NetworkBehaviour
 {
+    [Header("Reload Settings")]
+    [SerializeField] private int maxBullets = 2;
+    [SerializeField] private float pickUpDistance = 8f;
+
     [Header("References")]
-    [SerializeField] private Gun gun;
     [SerializeField] private Shoot shoot;
     [SerializeField] private Inputs input;
     [SerializeField] private Item item;
 
     private RaycastHit hitInfo;
-
     private bool IsOnlineMode => NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening;
 
     private void Update()
     {
-        if (!IsValidPlayer()) return;
-        if (CanReload() && IsBullet())
-        {
-            if (shoot.currentBullets < gun.maxBullets)
-            {
-                ReloadGun();
-            }
-            else
-            {
-                Debug.Log("Gun is full");
-            }
-
-        }
+        if (IsValidPlayer() && CanReload() && IsBullet())
+            ReloadGun();
     }
 
+    // <summary>
+    // Validate player based on online or offline mode
+    // </summary>
     private bool IsValidPlayer()
     {
         if (!IsOnlineMode) return true;
-        return item?.owner?.IsOwner ?? false;
+        return IsOwner;
     }
 
+    // <summary>
+    // Check if player can reload or not
+    // </summary>
     private bool CanReload()
     {
-        if (gun == null || input == null || item == null || shoot == null) return false;
-        if (!input.CheckPickUpPressed()) return false;
-        return true;
+        if (shoot != null && item != null && input != null)
+        {
+            if (item.isPickedUp && input.CheckPickUpPressed())
+                if (shoot.currentBullets.Value < maxBullets)
+                {
+                    return true;
+                }
+                else
+                {
+                    Debug.Log("Gun is already full");
+                    return false;
+                }
+        }
+        return false;
     }
 
+    // <summary>
+    // Check if the item is bullet or not
+    // </summary>
     private bool IsBullet()
     {
-        if (item?.owner?.camera == null) return false;
-        Transform cameraTransform = item.owner.camera.transform;
-        return Physics.Raycast(cameraTransform.position, cameraTransform.forward, out hitInfo, item.owner.pickUpDistance) && (hitInfo.collider?.CompareTag("Bullets") ?? false);
+        if (item?.owner?.camera == null) return false; // Ensure the camera is not null
+        Camera camera = item.owner.camera;
+
+        // Perform a raycast in the direction camera is facing and checks if it hits an bulet or not
+        return Physics.Raycast(camera.transform.position, camera.transform.forward, out hitInfo, pickUpDistance) &&
+        hitInfo.collider.CompareTag("Bullets");
     }
 
     private void ReloadGun()
     {
-        if (hitInfo.collider?.gameObject == null) return;
+        if (hitInfo.collider == null || shoot == null) return;
 
         if (IsOnlineMode)
-        {
-            NetworkObject bulletNtwObject = hitInfo.collider.gameObject.GetComponent<NetworkObject>();
-
-            if (bulletNtwObject == null) return;
-            RemoveBulletFromWorldServerRpc(bulletNtwObject);
-        }
+            RemoveBulletFromWorldServerRpc(hitInfo.collider.gameObject.GetComponent<NetworkObject>());
         else
-        {
             Destroy(hitInfo.collider.gameObject);
-        }
 
-        shoot.currentBullets += 1;
+        shoot.IncrementBullets(1);
     }
 
+    // <summary>
+    // Despawn and destroys the bullet on the server and the change reflects to all clients
+    // </summary>
     [ServerRpc]
     public void RemoveBulletFromWorldServerRpc(NetworkObjectReference bulletRef)
     {

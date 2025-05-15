@@ -124,7 +124,6 @@ public class LobbyManager : MonoBehaviour
 
         var joinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobby.Id);
         gameManager.lobby = joinedLobby;
-        ListenEvents(joinedLobby.Id);
 
         var joinAllocation = await relayManager.JoinRelayAllocation(joinedLobby.Data["AllocationCode"]?.Value);
         if (joinAllocation == null)
@@ -148,8 +147,7 @@ public class LobbyManager : MonoBehaviour
                 Data = new Dictionary<string, DataObject>
                 {
                     { "Password", new DataObject(DataObject.VisibilityOptions.Public, password) },
-                    { "AllocationCode", new DataObject(DataObject.VisibilityOptions.Member, joinCode) },
-                    { "IsGameStarted", new DataObject(DataObject.VisibilityOptions.Member, "false") }
+                    { "AllocationCode", new DataObject(DataObject.VisibilityOptions.Member, joinCode) }
                 }
             };
             return await LobbyService.Instance.CreateLobbyAsync(name, 2, options);
@@ -218,42 +216,6 @@ public class LobbyManager : MonoBehaviour
     }
     #endregion
 
-
-    #region Lobby events
-    private async void ListenEvents(string id)
-    {
-        try
-        {
-            var callbacks = new LobbyEventCallbacks();
-            callbacks.LobbyChanged += StateChanged;
-
-            await Lobbies.Instance.SubscribeToLobbyEventsAsync(id, callbacks);
-        }
-        catch (Exception ex)
-        {
-            ShowErrorAndReset($"Something went wrong {ex.Message}");
-        }
-    }
-
-    private void StateChanged(ILobbyChanges changes)
-    {
-        if (!changes.Data.Changed || !changes.Data.Value.ContainsKey("IsGameStarted"))
-        {
-            if (logger == null) return;
-            logger.LoggerMessage("[LobbyManager] Either data not changed or, IsGameStarted is not there or null");
-            return;
-        }
-
-        if (gameManager == null || gameManager.lobby == null) return;
-
-        if (bool.Parse(gameManager.lobby.Data["IsGameStarted"].Value))
-        {
-            Debug.Log("IsGameStarted is true now ");
-        }
-
-    }
-    #endregion
-
     #region Utility Methods
     private IEnumerator HeartbeatLobbyCoroutine(string lobbyId, float interval = 15f)
     {
@@ -271,25 +233,6 @@ public class LobbyManager : MonoBehaviour
     {
         uiManagerLobby.ShowFeedback(message);
         uiManagerLobby.HandleScreensToggles(uiManagerLobby.waitingScreen);
-    }
-
-    public async void ChangeMemberData(string lobbyId, string dataName, string newValue)
-    {
-        try
-        {
-            var updates = new UpdateLobbyOptions();
-
-            updates.Data = new Dictionary<string, DataObject>()
-            {
-                { dataName, new DataObject(DataObject.VisibilityOptions.Member, newValue) }
-            };
-
-            await LobbyService.Instance.UpdateLobbyAsync(lobbyId, updates);
-        }
-        catch (Exception ex)
-        {
-            ShowErrorAndReset($"Falied to update lobby {ex}");
-        }
     }
 
     private void ValidateReferences()
